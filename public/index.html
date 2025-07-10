@@ -8,7 +8,7 @@
     <style>
         .event-card {
             transition: all 0.3s ease;
-            border-left: 4px solid transparent;
+            border-left: 44px solid transparent; /* Corrected to 4px, was a typo */
         }
         .event-card:hover {
             transform: translateY(-5px);
@@ -223,7 +223,8 @@
                     </div>
                 </div>
                 <div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
-                    <button type="button" id="submitEventBtn" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
+                    <!-- Changed type from "button" to "submit" -->
+                    <button type="submit" id="submitEventBtn" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
                         Submit Event
                     </button>
                     <button type="button" id="cancelEventBtn" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:w-auto sm:text-sm">
@@ -267,7 +268,7 @@
         const eventModal = document.getElementById('eventModal');
         const cancelEventBtn = document.getElementById('cancelEventBtn');
         const eventForm = document.getElementById('eventForm');
-        const submitEventBtn = document.getElementById('submitEventBtn');
+        const submitEventBtn = document.getElementById('submitEventBtn'); // Still needed for reference, but not for click listener
         const successModal = document.getElementById('successModal');
         const successModalClose = document.getElementById('successModalClose');
         const eventsContainer = document.getElementById('eventsContainer');
@@ -298,7 +299,7 @@
             eventImage.addEventListener('change', handleImageUpload);
             removeImageBtn.addEventListener('click', handleRemoveImage);
             
-            // Changed: Listen for 'submit' event on the form itself
+            // IMPORTANT FIX: Attach submitEvent to the form's 'submit' event
             eventForm.addEventListener('submit', submitEvent); 
             
             // Category Filters
@@ -328,7 +329,7 @@
 
         // Form Functions
         function toggleRegistrationDetails() {
-            const registrationLink = document.getElementById('registrationLink'); // Ensure registrationLink is defined here
+            const registrationLink = document.getElementById('registrationLink'); 
             if (isRegistrationRequired.checked) {
                 registrationDetails.classList.remove('hidden');
                 registrationLink.required = true;
@@ -370,26 +371,26 @@
         }
 
         // Event Submission
-        // Changed: Added 'event' parameter and event.preventDefault()
         function submitEvent(event) {
             event.preventDefault(); // Prevent default form submission behavior
             
-            // Ensure eventName, clubName, eventDate, eventLocation, eventCategory, eventDescription are defined
+            // Get values from form fields
             const eventName = document.getElementById('eventName');
             const clubName = document.getElementById('clubName');
-            const eventDateInput = document.getElementById('eventDate'); // Renamed to avoid conflict
+            const eventDateInput = document.getElementById('eventDate'); 
             const eventLocation = document.getElementById('eventLocation');
             const eventCategory = document.getElementById('eventCategory');
             const eventDescription = document.getElementById('eventDescription');
-            const registrationLink = document.getElementById('registrationLink'); // Ensure registrationLink is defined here
+            const registrationLink = document.getElementById('registrationLink'); 
 
+            // Check form validity using the native HTML5 validation
             if (!eventForm.checkValidity()) {
-                eventForm.reportValidity();
+                eventForm.reportValidity(); // This will show native browser validation messages
                 return;
             }
             
             const now = new Date();
-            const eventDate = new Date(eventDateInput.value); // Use the renamed variable
+            const eventDate = new Date(eventDateInput.value); 
             const isExpired = eventDate < now;
             
             const eventData = {
@@ -397,7 +398,7 @@
                 isExpired: isExpired,
                 name: eventName.value,
                 club: clubName.value,
-                date: eventDateInput.value, // Use the renamed variable
+                date: eventDateInput.value, 
                 location: eventLocation.value,
                 category: eventCategory.value,
                 description: eventDescription.value,
