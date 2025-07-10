@@ -8,7 +8,7 @@
     <style>
         .event-card {
             transition: all 0.3s ease;
-            border-left: 44px solid transparent; /* Corrected to 4px, was a typo */
+            border-left: 4px solid transparent; /* Corrected from 44px */
         }
         .event-card:hover {
             transform: translateY(-5px);
@@ -268,7 +268,7 @@
         const eventModal = document.getElementById('eventModal');
         const cancelEventBtn = document.getElementById('cancelEventBtn');
         const eventForm = document.getElementById('eventForm');
-        const submitEventBtn = document.getElementById('submitEventBtn'); // Still needed for reference, but not for click listener
+        const submitEventBtn = document.getElementById('submitEventBtn'); 
         const successModal = document.getElementById('successModal');
         const successModalClose = document.getElementById('successModalClose');
         const eventsContainer = document.getElementById('eventsContainer');
@@ -300,6 +300,7 @@
             removeImageBtn.addEventListener('click', handleRemoveImage);
             
             // IMPORTANT FIX: Attach submitEvent to the form's 'submit' event
+            // This correctly captures submissions triggered by the button (now type="submit") or pressing Enter
             eventForm.addEventListener('submit', submitEvent); 
             
             // Category Filters
@@ -329,6 +330,7 @@
 
         // Form Functions
         function toggleRegistrationDetails() {
+            // Get reference to registrationLink inside this function
             const registrationLink = document.getElementById('registrationLink'); 
             if (isRegistrationRequired.checked) {
                 registrationDetails.classList.remove('hidden');
@@ -374,7 +376,8 @@
         function submitEvent(event) {
             event.preventDefault(); // Prevent default form submission behavior
             
-            // Get values from form fields
+            // IMPORTANT FIX: Get references to form elements *inside* this function
+            // This ensures you're working with the current state of the form inputs.
             const eventName = document.getElementById('eventName');
             const clubName = document.getElementById('clubName');
             const eventDateInput = document.getElementById('eventDate'); 
@@ -382,6 +385,7 @@
             const eventCategory = document.getElementById('eventCategory');
             const eventDescription = document.getElementById('eventDescription');
             const registrationLink = document.getElementById('registrationLink'); 
+            const isRegistrationRequired = document.getElementById('isRegistrationRequired'); // Re-get this too
 
             // Check form validity using the native HTML5 validation
             if (!eventForm.checkValidity()) {
