@@ -8,7 +8,7 @@
     <style>
         .event-card {
             transition: all 0.3s ease;
-            border-left: 4px solid transparent; /* Corrected from 44px */
+            border-left: 4px solid transparent;
         }
         .event-card:hover {
             transform: translateY(-5px);
@@ -223,8 +223,8 @@
                     </div>
                 </div>
                 <div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
-                    <!-- Changed type from "button" to "submit" -->
-                    <button type="submit" id="submitEventBtn" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
+                    <!-- Changed type back to "button" and re-attached click listener -->
+                    <button type="button" id="submitEventBtn" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
                         Submit Event
                     </button>
                     <button type="button" id="cancelEventBtn" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:w-auto sm:text-sm">
@@ -299,9 +299,9 @@
             eventImage.addEventListener('change', handleImageUpload);
             removeImageBtn.addEventListener('click', handleRemoveImage);
             
-            // IMPORTANT FIX: Attach submitEvent to the form's 'submit' event
-            // This correctly captures submissions triggered by the button (now type="submit") or pressing Enter
-            eventForm.addEventListener('submit', submitEvent); 
+            // FIX: Re-attached click listener to the submit button directly
+            // The button type is now "button" to prevent native form submission
+            submitEventBtn.addEventListener('click', submitEvent); 
             
             // Category Filters
             categoryFilters.forEach(filter => {
@@ -330,7 +330,6 @@
 
         // Form Functions
         function toggleRegistrationDetails() {
-            // Get reference to registrationLink inside this function
             const registrationLink = document.getElementById('registrationLink'); 
             if (isRegistrationRequired.checked) {
                 registrationDetails.classList.remove('hidden');
@@ -374,40 +373,42 @@
 
         // Event Submission
         function submitEvent(event) {
-            event.preventDefault(); // Prevent default form submission behavior
+            // No event.preventDefault() here if button type is "button" and we want to trigger native validation
+            // However, if we want to prevent page reload and handle submission via JS, keep it.
+            // Given the previous issues, let's keep it for explicit control.
+            event.preventDefault(); 
             
-            // IMPORTANT FIX: Get references to form elements *inside* this function
-            // This ensures you're working with the current state of the form inputs.
-            const eventName = document.getElementById('eventName');
-            const clubName = document.getElementById('clubName');
-            const eventDateInput = document.getElementById('eventDate'); 
-            const eventLocation = document.getElementById('eventLocation');
-            const eventCategory = document.getElementById('eventCategory');
-            const eventDescription = document.getElementById('eventDescription');
-            const registrationLink = document.getElementById('registrationLink'); 
-            const isRegistrationRequired = document.getElementById('isRegistrationRequired'); // Re-get this too
+            // Get references to form elements *inside* this function
+            const eventNameField = document.getElementById('eventName');
+            const clubNameField = document.getElementById('clubName');
+            const eventDateInputField = document.getElementById('eventDate'); 
+            const eventLocationField = document.getElementById('eventLocation');
+            const eventCategoryField = document.getElementById('eventCategory');
+            const eventDescriptionField = document.getElementById('eventDescription');
+            const registrationLinkField = document.getElementById('registrationLink'); 
+            const isRegistrationRequiredField = document.getElementById('isRegistrationRequired'); 
 
             // Check form validity using the native HTML5 validation
             if (!eventForm.checkValidity()) {
                 eventForm.reportValidity(); // This will show native browser validation messages
-                return;
+                return; // Stop the function if validation fails
             }
             
             const now = new Date();
-            const eventDate = new Date(eventDateInput.value); 
+            const eventDate = new Date(eventDateInputField.value); 
             const isExpired = eventDate < now;
             
             const eventData = {
                 id: Date.now(),
                 isExpired: isExpired,
-                name: eventName.value,
-                club: clubName.value,
-                date: eventDateInput.value, 
-                location: eventLocation.value,
-                category: eventCategory.value,
-                description: eventDescription.value,
-                registrationRequired: isRegistrationRequired.checked,
-                registrationLink: isRegistrationRequired.checked ? registrationLink.value : null,
+                name: eventNameField.value,
+                club: clubNameField.value,
+                date: eventDateInputField.value, 
+                location: eventLocationField.value,
+                category: eventCategoryField.value,
+                description: eventDescriptionField.value,
+                registrationRequired: isRegistrationRequiredField.checked,
+                registrationLink: isRegistrationRequiredField.checked ? registrationLinkField.value : null,
                 image: imagePreview.src !== '#' ? imagePreview.src : null,
                 createdAt: new Date().toISOString()
             };
@@ -432,9 +433,13 @@
         // Event Display
         function loadEvents(filterCategory = 'all') {
             const events = getEvents().sort((a, b) => new Date(a.date) - new Date(b.date));
-            const filteredEvents = filterCategory === 'all' 
-                ? events 
-                : events.filter(event => event.category === filterCategory);
+            const filteredEvents = events.filter(event => {
+                // Only show non-expired events unless explicitly filtering for all
+                if (filterCategory === 'all') {
+                    return true;
+                }
+                return event.category === filterCategory && !event.isExpired;
+            });
             
             renderEvents(filteredEvents);
         }
@@ -470,7 +475,7 @@
                 } else {
                     // Apply default inactive styles based on category
                     const inactiveColorMap = {
-                        'all': 'bg-blue-50 text-blue-600', // 'all' filter has a different default inactive state
+                        'all': 'bg-blue-50 text-blue-600', 
                         'tech': 'bg-blue-50 text-blue-600',
                         'cultural': 'bg-pink-50 text-pink-600',
                         'sports': 'bg-green-50 text-green-600',
